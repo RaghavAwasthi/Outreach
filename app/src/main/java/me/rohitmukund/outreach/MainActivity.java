@@ -30,11 +30,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main);
-        ListView listView = findViewById(R.id.list);
-        repositories = new ArrayList<String>();
-        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, repositories);
+        ListView listView = (ListView) findViewById(R.id.list);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, getRepositories());
         listView.setAdapter(arrayAdapter);
+arrayAdapter.notifyDataSetChanged();
+
+    }
+
+    public ArrayList<String> getRepositories() {
+        repositories = new ArrayList<String>();
+
         OkHttpClient client = new OkHttpClient();
         final String url = "https://api.github.com/orgs/JBossOutreach/repos";
         Request request = new Request.Builder()
@@ -49,20 +57,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if(response.isSuccessful()) {
-                    String myResponse = response.body().toString();
+                    String myResponse = response.body().string();
 
                     try {
                         JSONArray arr = new JSONArray(myResponse);
                         for(int i = 0; i <arr.length(); i++) {
                             JSONObject part = arr.getJSONObject(i);
                             String repoName = part.getString("name");
-
                             repositories.add(repoName);
-
-
-
-
-                        }
+                            }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -71,10 +74,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-
-
+        return repositories;
     }
-
-
-
 }
